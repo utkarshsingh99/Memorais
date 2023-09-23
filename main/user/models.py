@@ -54,7 +54,7 @@ class User:
 
   def login(self):
     resp = tools.JsonResp({ "message": "Invalid user credentials" }, 403)
-    
+    # resp = ''
     try:
       data = json.loads(request.data)
       email = data["email"].lower()
@@ -63,12 +63,10 @@ class User:
       if user and pbkdf2_sha256.verify(data["password"], user["password"]):
         access_token = auth.encodeAccessToken(user["id"], user["email"], user["plan"])
         refresh_token = auth.encodeRefreshToken(user["id"], user["email"], user["plan"])
-
-        app.db.users.update({ "id": user["id"] }, { "$set": {
+        app.db.users.update_one({ "id": user["id"] }, { "$set": {
           "refresh_token": refresh_token,
           "last_login": tools.nowDatetimeUTC()
         } })
-
         resp = tools.JsonResp({
           "id": user["id"],
           "email": user["email"],
@@ -87,7 +85,7 @@ class User:
   def logout(self):
     try:
       tokenData = jwt.decode(request.headers.get("AccessToken"), app.config["SECRET_KEY"])
-      app.db.users.update({ "id": tokenData["user_id"] }, { '$unset': { "refresh_token": "" } })
+      app.db.users.update_one({ "id": tokenData["user_id"] }, { '$unset': { "refresh_token": "" } })
       # Note: At some point I need to implement Token Revoking/Blacklisting
       # General info here: https://flask-jwt-extended.readthedocs.io/en/latest/blacklist_and_token_revoking.html
     except:
@@ -124,13 +122,13 @@ class User:
       }, 400)
     
     else:
-      if app.db.users.save(user):
+      if app.db.users.insert_one(user):
         
         # Log the user in (create and return tokens)
         access_token = auth.encodeAccessToken(user["id"], user["email"], user["plan"])
         refresh_token = auth.encodeRefreshToken(user["id"], user["email"], user["plan"])
 
-        app.db.users.update({ "id": user["id"] }, {
+        app.db.users.update_one({ "id": user["id"] }, {
           "$set": {
             "refresh_token": refresh_token
           }

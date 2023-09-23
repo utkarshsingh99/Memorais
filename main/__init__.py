@@ -21,8 +21,8 @@ def create_app():
   uri = "mongodb+srv://forgetful:qL6YzwjDKXJwHHx3@cluster0.qi4w9mc.mongodb.net/?retryWrites=true&w=majority"
   # Database Config
   if app.config["ENVIRONMENT"] == "development":
-    mongo = MongoClient(app.config["MONGO_HOSTNAME"], app.config["MONGO_PORT"])
-    # mongo = MongoClient(uri, server_api=ServerApi('1'))
+    # mongo = MongoClient(app.config["MONGO_HOSTNAME"], app.config["MONGO_PORT"])
+    mongo = MongoClient(uri, server_api=ServerApi('1'))
     # mongo
     app.db = mongo[app.config["MONGO_APP_DATABASE"]]
   else:
