@@ -1,2 +1,5 @@
 venv
 photos/
+backend/static
+backend/tmp
+backend/__pycache__
